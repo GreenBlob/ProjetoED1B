@@ -126,3 +126,4 @@ char* getCaminhoSaidaCOMPLETO(int argc, char** argv)
     strcat(caminhoSaidaCompleto,nomeSaida);
     return caminhoSaidaCompleto;
 }
+

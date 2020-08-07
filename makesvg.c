@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
+//
 
 
-void separarLinhas(int argc, char** argv, FILE* fileEntrada, FILE* fileSaida) //Lê o arquivo e separa em linhas
+void separarLinhas(int argc, char** argv, FILE* fileEntrada, FILE* fileSaida, FILE* qry) //Lê o arquivo e separa em linhas
 {  
+    node* head = startList();
     char footerSvg[] = "</svg>";
     char linha[1000];
     char *result ;
@@ -16,16 +18,19 @@ void separarLinhas(int argc, char** argv, FILE* fileEntrada, FILE* fileSaida) //
         //printf("%s", result);
         
         //printf("%lu", strlen(flinha));
-        gerarSvg(linha, fileSaida, flag);
+        gerarSvg(linha, fileSaida, flag, head);
         flag ++;
         }
     fputs(footerSvg, fileSaida);
+    qryF(argc, argv, qry, head);
     printf("Fim\n");
+    freeAll(head);
+    
 
     return;    
 }
 
-void gerarSvg(char* car, FILE* fileSaida, int flag)
+void gerarSvg(char* car, FILE* fileSaida, int flag, node* head)
 {
     char headerSvg[] = "<svg version = \"1.1\" xmlns = \"http://www.w3.org/2000/svg\">\n";
     if(flag == 0)
@@ -38,15 +43,15 @@ void gerarSvg(char* car, FILE* fileSaida, int flag)
         switch(inicial)
         {
             case('c'): //circulo
-            fputs(gerarCirculo(car), fileSaida);
+            fputs(gerarCirculo(car, head), fileSaida);
             break; 
 
             case('r')://retangulo
-            fputs(gerarRetangulo(car), fileSaida);
+            fputs(gerarRetangulo(car, head), fileSaida);
             break;
 
             case('t')://texto
-            fputs(gerarTexto(car),fileSaida);
+            fputs(gerarTexto(car, head),fileSaida);
             break;
 
             case('n')://aumentar numero
@@ -57,11 +62,11 @@ void gerarSvg(char* car, FILE* fileSaida, int flag)
     return;
 }
 
-char* gerarCirculo(char* car)
+char* gerarCirculo(char* car, node* head)
 {
     char placeholder[1000];
-    char cursor;
-    char x[50], y[50], r[50], corb[50], corp[50];
+    char cursor, tipo;
+    char x[50], y[50], r[50], corb[50], corp[50], index[50];
     char *retorno;
     for (int m = 0; m<50; m++)
     {
@@ -69,13 +74,14 @@ char* gerarCirculo(char* car)
         y[m] = '\0';
         r[m] = '\0';
         corb[m] = '\0';
-        corp[m] = '\0'; 
+        corp[m] = '\0';
+        index[m] = '\n'; 
     }
     int k = 0;
     int i = 0;
     int j = 0;
     cursor = car[0];
-    printf("%s", car);
+    //printf("%s", car);
     for(int i=0; i< 7; i++)
     { 
         j = 0;
@@ -86,10 +92,11 @@ char* gerarCirculo(char* car)
             switch (i)
             {
                 case (0)://
-                //printf("\nOk hmmm\n");
+                tipo = cursor;
                 break;
 
                 case (1)://i
+                index[j] = cursor;
                 //printf("\nOk 1\n");
                 break;
 
@@ -130,14 +137,19 @@ char* gerarCirculo(char* car)
     sprintf (placeholder, "<circle cx=\"%s\" cy=\"%s\" r=\"%s\" stroke=\"%s\" stroke-width=\"4\" fill=\"%s\" />\n",x, y, r, corb, corp  );
     retorno = (char*)malloc(strlen(placeholder)+1);
     retorno = placeholder;
+    int indexi = atoi(index);
+    int xi = atoi(x);
+    int yi = atoi(y);
+    int ri = atoi(r);
+    addToList(head, indexi, xi, yi, ri, 0, 0, corb, corp, "\0", tipo);
    return retorno;
 }
 
-char* gerarRetangulo(char* car) //<rect width=\"%s\" height=\"%s\" cx=\"%s\" yx=\"%s\"   stroke = \"%s" fill =\"%s\" />\n;
+char* gerarRetangulo(char* car, node* head) //<rect width=\"%s\" height=\"%s\" cx=\"%s\" yx=\"%s\"   stroke = \"%s" fill =\"%s\" />\n;
 {                               // w h x y corb corp
     char placeholder[1000];
-    char cursor;
-    char x[50], y[50], h[50],w[50], corb[50], corp[50];
+    char cursor, tipo;
+    char x[50], y[50], h[50],w[50], corb[50], corp[50],index[50];
     char *retorno;
     for (int m = 0; m<50; m++)
     {
@@ -147,12 +159,13 @@ char* gerarRetangulo(char* car) //<rect width=\"%s\" height=\"%s\" cx=\"%s\" yx=
         w[m] = '\0';
         corb[m] = '\0';
         corp[m] = '\0'; 
+        index[m] = '\n'; 
     }
     int k = 0;
     int i = 0;
     int j = 0;
     cursor = car[0];
-    printf("%s", car);
+    //printf("%s", car);
     for(int i=0; i< 8; i++)
     { 
         j = 0;
@@ -163,9 +176,11 @@ char* gerarRetangulo(char* car) //<rect width=\"%s\" height=\"%s\" cx=\"%s\" yx=
             switch (i)
             {
                 case (0)://
+                tipo = cursor;
                 break;
 
                 case (1)://i
+                index[j] = cursor;
                 break;
 
                 case (2)://r
@@ -200,19 +215,25 @@ char* gerarRetangulo(char* car) //<rect width=\"%s\" height=\"%s\" cx=\"%s\" yx=
         k++;
         cursor = car[k];
     }
-    printf("%s %s %s %s %s %s\n", w, h, x, y, corb, corp);
+    //printf("%s %s %s %s %s %s\n", w, h, x, y, corb, corp);
     sprintf (placeholder, "<rect width=\"%s\" height=\"%s\" x=\"%s\" y=\"%s\" stroke = \"%s\" fill =\"%s\" />\n",w, h, x, y, corb, corp  );
     retorno = (char*)malloc(strlen(placeholder)+1);
     retorno = placeholder;
+    int indexi = atoi(index);
+    int xi = atoi(x);
+    int yi = atoi(y);
+    int wi = atoi(w);
+    int hi = atoi(h);
+    addToList(head, indexi, xi, yi, 0, wi, hi, corb, corp, "\0", tipo);
    return retorno;
 }
 
-char* gerarTexto(char *car) //<text x=\"%s\" y=\"%s\" fill=\"%s\">%s</text>, i, x, y, corb, corp, txto
+char* gerarTexto(char *car, node* head) //<text x=\"%s\" y=\"%s\" fill=\"%s\">%s</text>, i, x, y, corb, corp, txto
 {                           //i x y corb corp txto
     {                               // w h x y corb corp
     char placeholder[1000];
-    char cursor;
-    char x[50], y[50], corb[50], corp[50], txto[100];
+    char cursor, tipo;
+    char x[50], y[50], corb[50], corp[50], txto[100],index[50];;
     char *retorno;
     for (int m = 0; m<50; m++)
     {
@@ -220,6 +241,7 @@ char* gerarTexto(char *car) //<text x=\"%s\" y=\"%s\" fill=\"%s\">%s</text>, i, 
         y[m] = '\0';
         corb[m] = '\0';
         corp[m] = '\0'; 
+        index[m] = '\n';
     }
     for(int n=0; n<100; n++)
     {
@@ -229,7 +251,7 @@ char* gerarTexto(char *car) //<text x=\"%s\" y=\"%s\" fill=\"%s\">%s</text>, i, 
     int i = 0;
     int j = 0;
     cursor = car[0];
-    printf("%s", car);
+    //printf("%s", car);
     for(int i=0; i< 7; i++)
     { 
         j = 0;
@@ -240,9 +262,11 @@ char* gerarTexto(char *car) //<text x=\"%s\" y=\"%s\" fill=\"%s\">%s</text>, i, 
             switch (i)
             {
                 case (0)://
+                tipo = cursor;
                 break;
 
                 case (1)://i
+                index[j] = cursor;
                 break;
 
                 case (2)://x
@@ -279,10 +303,14 @@ char* gerarTexto(char *car) //<text x=\"%s\" y=\"%s\" fill=\"%s\">%s</text>, i, 
         k++;
         cursor = car[k];
     }
-    printf("%s %s %s %s %s \n", x, y, corb, corp, txto);
+    //printf("%s %s %s %s %s \n", x, y, corb, corp, txto);
     sprintf (placeholder, "<text x=\"%s\" y=\"%s\" stroke = \"%s\" fill=\"%s\">%s</text>\n", x, y, corb, corp, txto  );
     retorno = (char*)malloc(strlen(placeholder)+1);
     retorno = placeholder;
+    int indexi = atoi(index);
+    int xi = atoi(x);
+    int yi = atoi(y);
+    addToList(head, indexi, xi, yi, 0, 0, 0, corb, corp, txto, tipo);
     return retorno;
     }
 }

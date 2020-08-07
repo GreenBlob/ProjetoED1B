@@ -1,23 +1,16 @@
-/* Esse programa cria um arquivo SVG de acordo com as instrucoes dadas atravez do arquivo .geo.
-    O executavel e os arquivos objeto sao criados atravez do comando make
-    O executavel deve ser executado atravez do comando ./makesiguel -e (parametro)-o (parametro)-q (parametro)-f(parametro)
-    Os parametros devem conter:
-    -e: caminho do arquivo de entrada
-    -o: caminho para a saida (.svg)
-    -f: nome do arquivo de entrada
-    -q: nome do arquivo de consuta
-
-    Por falta de tempo, infelizmente nao consegui adicionar todas as funcionalidades requeridas
-    pela primeira fase do trabalho.
-
-    Esse programa cria um arquivo .svg de acordo com as intrucoes providas no arquivo .geo, mas nao
-    le ou interpreta o arquivo de consulta .qry.
-
-    As funcionalidades aux\sentes serao adicionadas nos proximos dias.
-*/
-
 #pragma once
-
+typedef struct node
+{
+    struct node* next;
+    int index;
+    int x;
+    int y;
+    int r;
+    int w;
+    int h;
+    char *corb, *corp, *txto;
+    char tipo;
+}node;
 
 char* getCaminhoEntradaPARCIAL(int argc, char** argv);
 char* getcaminhoSaidaPARCIAL(int argc, char** argv);
@@ -30,8 +23,21 @@ char* getCaminhoSaidaCOMPLETO(int argc, char** argv);
 
 FILE* abrirFileEntrada(int argc, char** argv);
 FILE* abrirFileSaida(int argc,  char** argv);
-void separarLinhas(int argc, char** argv, FILE* fileEntrada, FILE* fileSaida);
-void gerarSvg(char* car, FILE* fileSaida, int flag);
-char* gerarCirculo(char* car);
-char* gerarRetangulo(char* car);
-char* gerarTexto(char *car);
+void separarLinhas(int argc, char** argv, FILE* fileEntrada, FILE* fileSaida,FILE* qry);
+void gerarSvg(char* car, FILE* fileSaida, int flag, node* head);
+char* gerarCirculo(char* car, node* head);
+char* gerarRetangulo(char* car, node* head);
+char* gerarTexto(char *car, node* head);
+
+FILE* abrirFileQry(int argc, char** argv);
+node* startList();
+node* addToList(node* head, int index, int xi, int yi, int ri, int rw, int rh, char* corb, char* corp, char* txto, char tipo);
+void freeAll(node* head);
+void qryF(int argc, char** argv, FILE* qry, node* head);
+void gerarSvgQry(char* linha, FILE* qry, node* head);
+void mocOF(char* linha, FILE* qry, node* head);
+void mocIF(char* linha, FILE* qry, node* head);
+void mocPntF(char* linha, FILE* qry, node* head);
+void mocPntAF(char* linha, FILE* qry, node* head);
+void mocDelfF(char* linha, FILE* qry, node* head);
+void mocDelfAF(char* linha, FILE* qry, node* head);
